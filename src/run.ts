@@ -112,6 +112,7 @@ export async function run(): Promise<Result> {
     for (let i = 0; ; i++) {
       core.info(`Attempt: ${i}`);
       const prData = await getPR();
+      core.debug(JSON.stringify(prData, null, 2));
       if (prData.data.state !== 'open') {
         core.error('PR is not open');
         return Result.PRNotOpen;
@@ -124,6 +125,7 @@ export async function run(): Promise<Result> {
             owner: context.repo.owner,
             repo: context.repo.repo,
             pull_number: pr.number,
+            // TODO this is broken
             sha: prData.data.head.sha,
           });
           core.info('Merged');
@@ -220,7 +222,9 @@ export async function run(): Promise<Result> {
   };
 
   core.info('Getting commit info');
+  // TODO this need to check all commits
   const commit = await getCommit();
+  core.debug(JSON.stringify(commit, null, 2));
   const onlyPackageJsonChanged = commit.data.files.every(
     ({ filename, status }) =>
       ['package.json', 'package-lock.json', 'yarn.lock'].includes(filename) &&
@@ -236,6 +240,7 @@ export async function run(): Promise<Result> {
   const packageJsonPr = await readPackageJson(pr.head.sha);
 
   core.info('Calculating diff');
+  // TODO don't allow merging empty diff?
   const diff: any = detailedDiff(packageJsonBase, packageJsonPr);
   core.debug(JSON.stringify(diff, null, 2));
   if (Object.keys(diff.added).length || Object.keys(diff.deleted).length) {
