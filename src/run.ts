@@ -125,6 +125,7 @@ export async function run(): Promise<Result> {
             repo: context.repo.repo,
             pull_number: pr.number,
             sha: pr.head.sha,
+            merge_method: 'squash',
           });
           core.info('Merged');
           return Result.PRMerged;
